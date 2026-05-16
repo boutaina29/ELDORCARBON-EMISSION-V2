@@ -937,16 +937,6 @@ const PROJECT_ROUTES = [
         road(RD_ALIAGA_ESBAS),
         legs);
     } },
-  { id: "cn_suez_alsancak", category: "China Import", label: "Sea via Suez → Alsancak", modes: ["sea"],
-    description: "Jiangsu → Shanghai (closest POL), Suez Canal route to Alsancak (İzmir).",
-    build(ct = "40FT") {
-      const legs = { pickup: "Jiangsu", pol: "Shanghai", pod: "Alsancak Port", delivery: "ESBAŞ" };
-      return buildResult(this, ct,
-        road(RD_JIANGSU_SHA),
-        corridorSuez(),
-        road(RD_ALSANCAK_ESBAS),
-        legs);
-    } },
   { id: "cn_cape_aliaga", category: "China Import", label: "Sea via Cape → Aliağa", modes: ["sea"],
     description: "Jiangsu → Shanghai (closest POL), Cape of Good Hope to Aliağa.",
     build(ct = "40FT") {
