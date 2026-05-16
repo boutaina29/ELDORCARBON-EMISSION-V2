@@ -76,12 +76,7 @@ function MapView({ result, showRiskZones = true }) {
       const inlandStyle = SEG_STYLE[segments.inlandTransport.mode] || SEG_STYLE.road;
       poly(segments.inlandTransport.points, inlandStyle, true);
     }
-    // portToDelivery: use main transport style if it's a rail/sea continuation (e.g. BRI Baku→ESBAŞ)
-    // otherwise default to road styling for local drayage legs.
-    const deliveryStyle = (result.isBRI && segments.portToDelivery?.length > 2)
-      ? SEG_STYLE.rail
-      : SEG_STYLE.road;
-    poly(segments.portToDelivery, deliveryStyle, false);
+    poly(segments.portToDelivery, SEG_STYLE.road, false);
 
     // Risk circles
     if (showRiskZones) {

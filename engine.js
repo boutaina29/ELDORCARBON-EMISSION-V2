@@ -330,7 +330,7 @@ function corridorBRI_rail1() {
   ], 75);
 }
 
-// BRI rail leg 2: Baku → ESBAŞ (overland rail via BTK)
+// BRI rail leg 2: Baku → Istanbul (overland rail via BTK / Kars–Ankara–Halkalı)
 function corridorBRI_rail2() {
   return buildPath([
     [40.41, 49.87],    // Baku (Caspian W coast)
@@ -340,15 +340,17 @@ function corridorBRI_rail2() {
     [39.90, 41.27],    // Erzurum
     [39.74, 37.02],    // Sivas
     [39.93, 32.85],    // Ankara
-    [38.79, 30.55],    // Afyon
-    [38.62, 27.43],    // Manisa
-    [38.31, 27.13],    // ESBAŞ
+    [40.10, 31.40],    // Bolu
+    [40.45, 30.00],    // Adapazarı / Sakarya
+    [40.78, 29.45],    // Gebze
+    [41.01, 28.97],    // Istanbul (Halkalı freight terminal)
   ], 75);
 }
 
 function corridorBRI() {
-  // Middle Corridor / BTK: Xi'an → Almaty → Aktau ⟶ Caspian ferry ⟶ Baku → BTK rail → İzmir.
-  // Concatenates both rail legs with Caspian ferry waypoints in the middle.
+  // Middle Corridor / BTK: Xi'an → Almaty → Aktau ⟶ Caspian ferry ⟶ Baku → BTK rail → Istanbul.
+  // The Caspian crossing (Aktau→Baku) is the TITR ferry; waypoints stay within the sea.
+  // Rail terminates at Istanbul (Halkalı); road takes over for the final leg to ESBAŞ.
   return buildPath([
     [34.27, 108.93],   // Xi'an
     [36.06, 103.79],   // Lanzhou
@@ -367,9 +369,10 @@ function corridorBRI() {
     [39.90, 41.27],    // Erzurum
     [39.74, 37.02],    // Sivas
     [39.93, 32.85],    // Ankara
-    [38.79, 30.55],    // Afyon
-    [38.62, 27.43],    // Manisa
-    [38.31, 27.13],    // ESBAŞ
+    [40.10, 31.40],    // Bolu
+    [40.45, 30.00],    // Adapazarı / Sakarya
+    [40.78, 29.45],    // Gebze
+    [41.01, 28.97],    // Istanbul (Halkalı freight terminal)
   ], 75);
 }
 
@@ -1003,17 +1006,15 @@ const PROJECT_ROUTES = [
         road(RD_ALSANCAK_ESBAS),
         legs);
     } },
-  { id: "cn_bri", category: "China Import", label: "Rail via Middle Corridor (Jiangsu → Xi'an → BTK)", modes: ["rail"],
-    description: "Jiangsu → Xi'an by road, then Trans-Caspian rail+ferry+BTK rail to İzmir.",
+  { id: "cn_bri", category: "China Import", label: "Rail via Middle Corridor (Jiangsu → Xi'an → BTK)", modes: ["rail", "road"],
+    description: "Jiangsu → Xi'an by road, Trans-Caspian rail+ferry+BTK rail to Istanbul, then truck to ESBAŞ.",
     build(ct = "40FT") {
-      const legs = { pickup: "Jiangsu", pol: "Xi'an", pod: "ESBAŞ", delivery: "ESBAŞ" };
+      const legs = { pickup: "Jiangsu", pol: "Xi'an", pod: "Istanbul", delivery: "ESBAŞ" };
       return buildResult(this, ct,
-        road(RD_JIANGSU_XIAN),
-        corridorBRI_rail1(),                                          // rail: Xi'an → Aktau
-        corridorBRI_rail2(),                                          // rail: Baku → ESBAŞ
-        legs,
-        { isBRI: true, inlandTransport: { mode: "sea", points: buildPath(CASPIAN_FERRY, 30) } }
-      );
+        road(RD_JIANGSU_XIAN),   // road: Jiangsu → Xi'an
+        corridorBRI(),            // rail: Xi'an → Istanbul (incl. Caspian ferry waypoints)
+        road(RD_IST_ESBAS),      // road: Istanbul → ESBAŞ
+        legs, { isBRI: true });
     } },
 
   // ITALY EXPORT — all RoRo lanes via Trieste
