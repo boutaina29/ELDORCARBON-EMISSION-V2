@@ -225,128 +225,113 @@ function AnalyticsView() {
   );
 }
 
+// Shorten route labels for the compact scatter legend
+function scatterLabel(s) {
+  return s
+    .replace(/^Sea via Suez — /, 'Suez · ')
+    .replace(/^Sea via Cape — /, 'Cape · ')
+    .replace(/^Rail via /, '')
+    .replace(/ \(Jiangsu → Xi'an → BTK\)/, '')
+    .replace(/^RoRo \+ Rail \+ Truck/, 'RoRo+Rail+Truck')
+    .replace(/^RoRo \+ Rail\b/, 'RoRo+Rail')
+    .replace(/^RoRo \+ Truck\b/, 'RoRo+Truck')
+    .replace(/^Sea \+ Rail\b/, 'Sea+Rail')
+    .replace(/^Sea \+ Truck\b/, 'Sea+Truck')
+    .replace(/\(Mediterranean\)/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function ScatterChart({ computed, maxCO2, maxDist }) {
   const SEG = window.SEG_STYLE;
-  const W = 760, H = 440, P = { l: 64, r: 200, t: 20, b: 50 };
-  const innerW = W - P.l - P.r, innerH = H - P.t - P.b;
+  // Wider viewBox gives the right-margin legend enough room
+  const W = 820, H = 480, PAD = { l: 64, r: 260, t: 24, b: 54 };
+  const iW = W - PAD.l - PAD.r;
+  const iH = H - PAD.t - PAD.b;
+
   const minDist = Math.min(...computed.map(c => c.result.distance));
-  const minCO2 = Math.min(...computed.map(c => c.result.emissions.co2Total));
-  
-  const x = d => P.l + ((d - minDist*0.85) / (maxDist*1.05 - minDist*0.85)) * innerW;
-  const y = c => P.t + innerH - ((c - minCO2*0.85) / (maxCO2*1.05 - minCO2*0.85)) * innerH;
+  const minCO2  = Math.min(...computed.map(c => c.result.emissions.co2Total));
 
-  // Compute label positions with collision avoidance
-  const points = computed.map(({ def, result }) => ({
-    def,
-    result,
-    cx: x(result.distance),
-    cy: y(result.emissions.co2Total),
-    color: SEG[result.emissions.mainMode]?.color,
-  }));
+  const sx = d => PAD.l + ((d - minDist * 0.85) / (maxDist * 1.05 - minDist * 0.85)) * iW;
+  const sy = c => PAD.t + iH - ((c - minCO2 * 0.85) / (maxCO2 * 1.05 - minCO2 * 0.85)) * iH;
 
-  // Separate points by label side
-  const leftPoints = points.filter(p => p.cx >= P.l + innerW * 0.65).sort((a, b) => a.cy - b.cy);
-  const rightPoints = points.filter(p => p.cx < P.l + innerW * 0.65).sort((a, b) => a.cy - b.cy);
+  // Sort high→low CO₂ so label order matches y-axis (top = most emissions)
+  const pts = computed
+    .map(({ def, result }) => ({
+      def, result,
+      cx: sx(result.distance),
+      cy: sy(result.emissions.co2Total),
+      color: SEG[result.emissions.mainMode]?.color ?? '#666',
+    }))
+    .sort((a, b) => b.result.emissions.co2Total - a.result.emissions.co2Total);
 
-  const minLabelSpacing = 24;
-  
-  // Function to distribute labels evenly when overlapping
-  const distributeLabels = (pts, labelRight) => {
-    if (pts.length === 0) return [];
-    
-    const positioned = [];
-    
-    pts.forEach((point, i) => {
-      let labelY = point.cy;
-      
-      // Check against all previously positioned labels
-      for (let j = 0; j < positioned.length; j++) {
-        const prev = positioned[j];
-        if (labelY < prev.labelY + minLabelSpacing) {
-          labelY = prev.labelY + minLabelSpacing;
-        }
-      }
-      
-      positioned.push({ ...point, labelY, labelRight });
-    });
-    
-    // If labels overflow the bottom, redistribute them evenly
-    const lastLabel = positioned[positioned.length - 1];
-    if (lastLabel && lastLabel.labelY > H - P.b - 10) {
-      const totalHeight = H - P.t - P.b - 20;
-      const neededHeight = positioned.length * minLabelSpacing;
-      
-      if (neededHeight > totalHeight) {
-        // Compress spacing proportionally
-        const scale = totalHeight / neededHeight;
-        positioned.forEach((p, i) => {
-          p.labelY = P.t + 10 + (i * minLabelSpacing * scale);
-        });
-      } else {
-        // Distribute evenly in available space
-        positioned.forEach((p, i) => {
-          p.labelY = P.t + 10 + (i * minLabelSpacing);
-        });
-      }
-    }
-    
-    return positioned;
+  // Evenly distribute label rows top→bottom across the inner height
+  const SLOT = Math.max(22, (iH - 8) / Math.max(pts.length - 1, 1));
+  const LABEL_X = W - PAD.r + 14;
+  const labelY = (i) => {
+    const n = pts.length;
+    if (n === 1) return PAD.t + iH / 2 - 8;
+    const top = PAD.t + (iH - SLOT * (n - 1)) / 2;
+    return Math.max(PAD.t + 4, top + i * SLOT);
   };
 
-  const labelPositions = [
-    ...distributeLabels(rightPoints, true),
-    ...distributeLabels(leftPoints, false)
-  ];
+  // Elbow right-edge x: route dots exit to the right boundary
+  const elbowX = W - PAD.r - 6;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="scatter-svg" preserveAspectRatio="xMidYMid meet">
       {/* Grid */}
       {[0, 0.25, 0.5, 0.75, 1].map(t => (
         <g key={t}>
-          <line x1={P.l} x2={W-P.r} y1={P.t + innerH*t} y2={P.t + innerH*t} stroke="var(--line-soft)" strokeDasharray="2 4" />
-          <line y1={P.t} y2={P.t+innerH} x1={P.l + innerW*t} x2={P.l + innerW*t} stroke="var(--line-soft)" strokeDasharray="2 4" />
+          <line x1={PAD.l} x2={W - PAD.r} y1={PAD.t + iH * t} y2={PAD.t + iH * t}
+            stroke="var(--line-soft)" strokeDasharray="2 4" />
+          <line x1={PAD.l + iW * t} x2={PAD.l + iW * t} y1={PAD.t} y2={PAD.t + iH}
+            stroke="var(--line-soft)" strokeDasharray="2 4" />
         </g>
       ))}
       {/* Axes */}
-      <line x1={P.l} x2={W-P.r} y1={P.t+innerH} y2={P.t+innerH} stroke="var(--ink)" strokeWidth="1" />
-      <line x1={P.l} x2={P.l} y1={P.t} y2={P.t+innerH} stroke="var(--ink)" strokeWidth="1" />
+      <line x1={PAD.l} x2={W - PAD.r} y1={PAD.t + iH} y2={PAD.t + iH} stroke="var(--ink)" strokeWidth="1" />
+      <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={PAD.t + iH} stroke="var(--ink)" strokeWidth="1" />
+      {/* Right-margin divider */}
+      <line x1={W - PAD.r} x2={W - PAD.r} y1={PAD.t} y2={PAD.t + iH}
+        stroke="var(--line)" strokeWidth="0.5" strokeDasharray="1 4" />
       {/* Axis labels */}
-      <text x={P.l + innerW/2} y={H-12} textAnchor="middle" className="scatter-axis-label">Distance (km) →</text>
-      <text x={-H/2} y={18} textAnchor="middle" className="scatter-axis-label" transform="rotate(-90)">CO₂e (tonnes) →</text>
-      {/* Quadrant highlight */}
-      <rect x={P.l} y={P.t + innerH*0.5} width={innerW*0.5} height={innerH*0.5} fill="var(--leaf)" opacity="0.04" />
-      <text x={P.l + innerW*0.25} y={P.t + innerH*0.92} textAnchor="middle" fill="var(--leaf)" fontSize="11" fontWeight="600" opacity="0.5">SWEET SPOT</text>
-      {/* Points */}
-      {labelPositions.map(({ def, result, cx, cy, color, labelY, labelRight }) => {
+      <text x={PAD.l + iW / 2} y={H - 12} textAnchor="middle" className="scatter-axis-label">Distance (km) →</text>
+      <text x={-H / 2} y={18} textAnchor="middle" className="scatter-axis-label" transform="rotate(-90)">CO₂e (tonnes) →</text>
+      {/* Sweet-spot quadrant */}
+      <rect x={PAD.l} y={PAD.t + iH * 0.5} width={iW * 0.5} height={iH * 0.5}
+        fill="var(--leaf)" opacity="0.04" />
+      <text x={PAD.l + iW * 0.25} y={PAD.t + iH * 0.92} textAnchor="middle"
+        fill="var(--leaf)" fontSize="11" fontWeight="600" opacity="0.5">SWEET SPOT</text>
+      {/* Leader lines drawn first (under dots) */}
+      {pts.map(({ def, cx, cy, color }, i) => {
+        const ly = labelY(i) + 8;
         return (
-          <g key={def.id}>
-            <circle cx={cx} cy={cy} r="14" fill={color} opacity="0.15" />
-            <circle cx={cx} cy={cy} r="6" fill={color} />
-            <line 
-              x1={cx} y1={cy} 
-              x2={labelRight ? cx + 14 : cx - 14} 
-              y2={labelY} 
-              stroke={color} strokeWidth="1" opacity="0.4" strokeDasharray="2 2"
-            />
-            <text 
-              x={labelRight ? cx + 18 : cx - 18} 
-              y={labelY + 4} 
-              textAnchor={labelRight ? "start" : "end"}
-              fontSize="11" 
-              fill="var(--ink)" 
-              fontWeight="500"
-            >
-              {def.label}
+          <path key={`l-${def.id}`}
+            d={`M ${cx} ${cy} H ${elbowX} V ${ly} H ${LABEL_X - 3}`}
+            fill="none" stroke={color} strokeWidth="0.9" opacity="0.28" strokeDasharray="2 2"
+          />
+        );
+      })}
+      {/* Dots */}
+      {pts.map(({ def, cx, cy, color }) => (
+        <g key={`d-${def.id}`}>
+          <circle cx={cx} cy={cy} r="13" fill={color} opacity="0.13" />
+          <circle cx={cx} cy={cy} r="5.5" fill={color} />
+        </g>
+      ))}
+      {/* Labels (drawn last, always on top) */}
+      {pts.map(({ def, result, color }, i) => {
+        const ly = labelY(i);
+        return (
+          <g key={`t-${def.id}`}>
+            {/* Color swatch */}
+            <rect x={LABEL_X} y={ly + 1} width="6" height="6" rx="1" fill={color} opacity="0.85" />
+            <text x={LABEL_X + 10} y={ly + 9} fontSize="10" fontWeight="500" fill="var(--ink)">
+              {scatterLabel(def.label)}
             </text>
-            <text 
-              x={labelRight ? cx + 18 : cx - 18} 
-              y={labelY + 17} 
-              textAnchor={labelRight ? "start" : "end"}
-              fontSize="9.5" 
-              fill="var(--mute)" 
-              fontFamily="var(--mono)"
-            >
-              {(result.emissions.co2Total/1000).toFixed(2)}t · {result.distance.toLocaleString()}km
+            <text x={LABEL_X + 10} y={ly + 20} fontSize="8.5" fill="var(--mute)" fontFamily="var(--mono)">
+              {(result.emissions.co2Total / 1000).toFixed(2)}t · {result.distance.toLocaleString()}km
             </text>
           </g>
         );
