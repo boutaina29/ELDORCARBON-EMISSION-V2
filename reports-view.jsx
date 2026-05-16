@@ -51,7 +51,7 @@ function InsightsView({ tweaks = {} }) {
           <p className="ins-hero__sub">
             Between <strong>2024 and 2035</strong> the European automotive supply chain will pass through
             six overlapping regulatory regimes — CSRD, CBAM, Euro 7, ETS2, FuelEU Maritime and the 2035 ICE ban.
-            For a Türkiye–EU lane operator like ESBAŞ, each one rewires the cost of carbon in a different way.
+            For a Türkiye–EU lane operator like Eldor, each one rewires the cost of carbon in a different way.
             This page sketches the landscape and ties it back to the routes you can model in the tool.
           </p>
         </div>
