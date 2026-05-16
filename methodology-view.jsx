@@ -9,7 +9,7 @@ function MethodologyView() {
   const formula = "CO₂e = EF × payload × distance ÷ 1000";
 
   // Worked example - Shanghai → ESBAŞ via Suez, 40FT
-  const sampleRoute = window.RoutingEngine.PROJECT_ROUTES.find(r => r.id === "cn_suez_sha");
+  const sampleRoute = window.RoutingEngine.PROJECT_ROUTES.find(r => r.id === "cn_suez_aliaga");
   const sample = sampleRoute.build("40FT");
   const { distRoad1, distMain, distRoad2, co2Road1, co2Main, co2Road2, cargoWeight } = sample.emissions;
 
