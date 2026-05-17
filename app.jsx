@@ -208,6 +208,8 @@ function App() {
   const Analytics   = window.AnalyticsView;
   const Reports     = window.ReportsView;
 
+  const NAV_ICONS = { routing: "🗺️", analytics: "📊", reports: "💡", methodology: "📐" };
+
   return (
     <div className="app" data-screen-label="Carbon Routing Tool">
       {TweaksPanel && TweakToggle && (
@@ -263,16 +265,26 @@ function App() {
         </div>
       </header>
 
-      {view === "routing" && <RoutingView tweaks={t} lang={lang} />}
+      {view === "routing" && <RoutingView key={view} tweaks={t} lang={lang} />}
       {view === "analytics" && Analytics && (
-        <main className="page"><Analytics lang={lang} /></main>
+        <main key={view} className="page"><Analytics lang={lang} /></main>
       )}
       {view === "reports" && Reports && (
-        <main className="page"><Reports tweaks={t} lang={lang} /></main>
+        <main key={view} className="page"><Reports tweaks={t} lang={lang} /></main>
       )}
       {view === "methodology" && Methodology && (
-        <main className="page"><Methodology lang={lang} /></main>
+        <main key={view} className="page"><Methodology lang={lang} /></main>
       )}
+
+      <nav className="mobile-nav">
+        {NAV.map(n => (
+          <button key={n.id} onClick={() => setView(n.id)}
+            className={`mobile-nav-btn ${view === n.id ? "is-active" : ""}`}>
+            <span className="mobile-nav-icon">{NAV_ICONS[n.id]}</span>
+            <span>{n.label}</span>
+          </button>
+        ))}
+      </nav>
 
       <footer className="footnote">
         <div className="footnote__col">

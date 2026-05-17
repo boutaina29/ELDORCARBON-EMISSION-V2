@@ -6,6 +6,7 @@
 function MethodologyView({ lang = "en" }) {
   const E = window.RoutingEngine.ECOTRANSIT;
   const T = window.TRANSLATIONS[lang].methodology;
+  const CDESC = window.TRANSLATIONS[lang].containerDescs || window.TRANSLATIONS.en.containerDescs;
 
   // Worked example - Shanghai → ESBAŞ via Suez, 40FT
   const sampleRoute = window.RoutingEngine.PROJECT_ROUTES.find(r => r.id === "cn_suez_aliaga");
@@ -134,9 +135,9 @@ function MethodologyView({ lang = "en" }) {
           </div>
           <div className="cont-spec-list">
             {[
-              { type: "20FT", range: "25,000 – 28,300 kg", avg: E.cargoWeight["20FT"], desc: "Standard 20-foot dry container. Common for dense cargo." },
-              { type: "40FT", range: "26,500 – 28,800 kg", avg: E.cargoWeight["40FT"], desc: "Standard 40-foot dry. The workhorse of containerised freight." },
-              { type: "40HC", range: "28,500 – 28,700 kg", avg: E.cargoWeight["40HC"], desc: "40-foot high-cube. Extra height for volumetric cargo." },
+              { type: "20FT", range: "25,000 – 28,300 kg", avg: E.cargoWeight["20FT"], desc: CDESC["20FT"] },
+              { type: "40FT", range: "26,500 – 28,800 kg", avg: E.cargoWeight["40FT"], desc: CDESC["40FT"] },
+              { type: "40HC", range: "28,500 – 28,700 kg", avg: E.cargoWeight["40HC"], desc: CDESC["40HC"] },
             ].map(c => (
               <div key={c.type} className="cont-spec">
                 <div className="cont-spec__head">

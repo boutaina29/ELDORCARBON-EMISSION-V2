@@ -7,31 +7,67 @@ const { useMemo: _useMemo } = React;
 function pct(v, max) { return Math.max(2, Math.round((v / Math.max(max, 1)) * 100)); }
 function fmtT(v) { return (v / 1000).toFixed(2); }
 
+// ─── Animated number counter ──────────────────────────────
+function AnimatedValue({ target, format }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (isNaN(target)) return;
+    let start = null;
+    const duration = 750;
+    function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const eased = 1 - (1 - p) ** 3;
+      if (ref.current) ref.current.textContent = format(eased * target);
+      if (p < 1) requestAnimationFrame(step);
+      else if (ref.current) ref.current.textContent = format(target);
+    }
+    requestAnimationFrame(step);
+  }, [target]);
+  return React.createElement("span", { ref }, format(target));
+}
+
 // ─── KPI strip ────────────────────────────────────────────
 function KpiStrip({ result, lang = "en" }) {
   if (!result) return null;
   const { distance, emissions, containerType, modes, isBRI } = result;
   const TK = window.TRANSLATIONS[lang].kpi;
-  const intensity = (emissions.co2Total / Math.max(distance, 1)).toFixed(2);
+  const intensity = parseFloat((emissions.co2Total / Math.max(distance, 1)).toFixed(2));
   const efDisplay = isBRI ? "46.0" : emissions.efMain;
-  const kpis = [
-    { label: TK.totalDist, val: distance.toLocaleString(), unit: "km", sub: TK.allLegs },
-    { label: TK.totalCO2, val: fmtT(emissions.co2Total), unit: TK.tonnes, sub: `${emissions.co2Total.toLocaleString()} kg` },
-    { label: TK.intensity, val: intensity, unit: "kg / km", sub: `EF ${efDisplay} g/t-km` },
-    { label: TK.payload, val: emissions.cargoWeight.toFixed(2), unit: "t", sub: `${containerType} ${TK.avgPayload}` },
-  ];
   return (
     <div className="kpi-strip">
-      {kpis.map(k => (
-        <div key={k.label} className="kpi">
-          <div className="kpi__label">{k.label}</div>
-          <div className="kpi__value">
-            <span className="kpi__num">{k.val}</span>
-            <span className="kpi__unit">{k.unit}</span>
-          </div>
-          <div className="kpi__sub">{k.sub}</div>
+      <div className="kpi">
+        <div className="kpi__label">{TK.totalDist}</div>
+        <div className="kpi__value">
+          <span className="kpi__num"><AnimatedValue target={distance} format={v => Math.round(v).toLocaleString()} /></span>
+          <span className="kpi__unit">km</span>
         </div>
-      ))}
+        <div className="kpi__sub">{TK.allLegs}</div>
+      </div>
+      <div className="kpi">
+        <div className="kpi__label">{TK.totalCO2}</div>
+        <div className="kpi__value">
+          <span className="kpi__num"><AnimatedValue target={emissions.co2Total / 1000} format={v => v.toFixed(2)} /></span>
+          <span className="kpi__unit">{TK.tonnes}</span>
+        </div>
+        <div className="kpi__sub">{emissions.co2Total.toLocaleString()} kg</div>
+      </div>
+      <div className="kpi">
+        <div className="kpi__label">{TK.intensity}</div>
+        <div className="kpi__value">
+          <span className="kpi__num"><AnimatedValue target={intensity} format={v => v.toFixed(2)} /></span>
+          <span className="kpi__unit">kg / km</span>
+        </div>
+        <div className="kpi__sub">EF {efDisplay} g/t-km</div>
+      </div>
+      <div className="kpi">
+        <div className="kpi__label">{TK.payload}</div>
+        <div className="kpi__value">
+          <span className="kpi__num"><AnimatedValue target={emissions.cargoWeight} format={v => v.toFixed(2)} /></span>
+          <span className="kpi__unit">t</span>
+        </div>
+        <div className="kpi__sub">{containerType} {TK.avgPayload}</div>
+      </div>
     </div>
   );
 }
@@ -41,6 +77,7 @@ function EmissionsPanel({ emissions, containerType, lang = "en" }) {
   const E = window.RoutingEngine.ECOTRANSIT;
   const SEG = window.SEG_STYLE;
   const TE = window.TRANSLATIONS[lang].emissions;
+  const TUI = window.TRANSLATIONS[lang].ui;
   const {
     co2Total, co2Main, co2Inland, co2Road1, co2Road2,
     mainMode, inlandMode, distMain, distInland, distRoad1, distRoad2,
@@ -83,7 +120,7 @@ function EmissionsPanel({ emissions, containerType, lang = "en" }) {
 
       <div className="emissions-grid">
         <div className="emissions-bars">
-          <div className="emissions-bars__title">Segment breakdown</div>
+          <div className="emissions-bars__title">{TUI.segmentBreakdown}</div>
           {rows.map(row => (
             <div key={row.name} className="bar-row">
               <div className="bar-row__head">
@@ -100,7 +137,7 @@ function EmissionsPanel({ emissions, containerType, lang = "en" }) {
         </div>
 
         <div className="emissions-compare">
-          <div className="emissions-bars__title">Container comparison</div>
+          <div className="emissions-bars__title">{TUI.containerComparison}</div>
           {others.map(o => {
             const delta = o.total - co2Total;
             const isBest = o.total === bestTotal && !o.isSelected;
@@ -109,7 +146,7 @@ function EmissionsPanel({ emissions, containerType, lang = "en" }) {
                 <div className="compare-row__head">
                   <span className="compare-row__type">{o.type}</span>
                   {o.isSelected && <span className="compare-row__tag">{TE.selected}</span>}
-                  {isBest && <span className="compare-row__tag compare-row__tag--best">Lowest</span>}
+                  {isBest && <span className="compare-row__tag compare-row__tag--best">{TUI.lowest}</span>}
                   <span className="compare-row__sub">{E.cargoWeight[o.type]} t payload</span>
                 </div>
                 <div className="compare-row__num">
@@ -118,7 +155,7 @@ function EmissionsPanel({ emissions, containerType, lang = "en" }) {
                 </div>
                 {!o.isSelected && (
                   <div className="compare-row__delta" style={{ color: delta > 0 ? "#a8392a" : "#3a6b3a" }}>
-                    {delta > 0 ? "+" : "−"}{Math.abs(delta).toLocaleString()} kg vs selected
+                    {delta > 0 ? "+" : "−"}{Math.abs(delta).toLocaleString()} kg {TUI.vsSelected}
                   </div>
                 )}
               </div>
@@ -135,11 +172,12 @@ function LegsPanel({ result, lang = "en" }) {
   const { legs, modes, distance, emissions } = result;
   const SEG = window.SEG_STYLE;
   const TR = window.TRANSLATIONS[lang].route;
+  const TUI = window.TRANSLATIONS[lang].ui;
   const items = [
-    { kind: "pickup",   label: "Pickup",   name: legs.pickup,   color: "#0d0f12" },
-    { kind: "pol",      label: "POL",      name: legs.pol,      color: "#1d4275" },
-    { kind: "pod",      label: "POD",      name: legs.pod,      color: "#5d3a6e" },
-    { kind: "delivery", label: "Delivery", name: legs.delivery, color: "#9d4421" },
+    { kind: "pickup",   label: TUI.pickup,   name: legs.pickup,   color: "#0d0f12" },
+    { kind: "pol",      label: TUI.pol,      name: legs.pol,      color: "#1d4275" },
+    { kind: "pod",      label: TUI.pod,      name: legs.pod,      color: "#5d3a6e" },
+    { kind: "delivery", label: TUI.delivery, name: legs.delivery, color: "#9d4421" },
   ];
   return (
     <div className="card card--legs">
@@ -175,11 +213,11 @@ function LegsPanel({ result, lang = "en" }) {
       </ol>
       <div className="legs-footer">
         <div>
-          <div className="legs-footer__label">Distance</div>
+          <div className="legs-footer__label">{TUI.distLabel}</div>
           <div className="legs-footer__val">{distance.toLocaleString()} <em>km</em></div>
         </div>
         <div>
-          <div className="legs-footer__label">Main mode</div>
+          <div className="legs-footer__label">{TUI.mainModeLabel}</div>
           <div className="legs-footer__val">{emissions.mainMode.toUpperCase()}</div>
         </div>
       </div>
@@ -192,6 +230,7 @@ function RiskPanel({ result, lang = "en" }) {
   const { risks, riskLevel } = result;
   const RC = window.RISK_COLOR;
   const TRISK = window.TRANSLATIONS[lang].risk;
+  const TUI = window.TRANSLATIONS[lang].ui;
   return (
     <div className="card card--risk" style={{ "--accent": RC[riskLevel] }}>
       <div className="card__head">
@@ -203,8 +242,8 @@ function RiskPanel({ result, lang = "en" }) {
       </div>
       {risks.length === 0 ? (
         <div className="risk-empty">
-          <div className="risk-empty__title">No high-risk zones intersected</div>
-          <div className="risk-empty__sub">The sea segment of this route stays clear of all monitored chokepoints.</div>
+          <div className="risk-empty__title">{TUI.noRiskZones}</div>
+          <div className="risk-empty__sub">{TUI.noRiskZonesSub}</div>
         </div>
       ) : (
         <div className="risk-list">
@@ -213,7 +252,7 @@ function RiskPanel({ result, lang = "en" }) {
               <span className="risk-row__pulse"><span></span></span>
               <div className="risk-row__body">
                 <div className="risk-row__name">{r.name}</div>
-                <div className="risk-row__level">{r.level} risk corridor</div>
+                <div className="risk-row__level">{r.level} {TUI.riskCorridor}</div>
               </div>
               <span className="risk-row__chip">{r.level}</span>
             </div>
@@ -226,8 +265,14 @@ function RiskPanel({ result, lang = "en" }) {
 
 // ─── Insight + suggestions ────────────────────────────────
 function InsightPanel({ result, lang = "en" }) {
-  const { insight, suggestions } = result;
   const TINS = window.TRANSLATIONS[lang].insight;
+  const TUI = window.TRANSLATIONS[lang].ui;
+
+  const insightData = lang === "tr" && window.generateInsightTR
+    ? window.generateInsightTR(result.routeType, result.distance, result.riskLevel, result.modes, result.risks)
+    : { insight: result.insight, suggestions: result.suggestions };
+
+  const { insight, suggestions } = insightData;
   
   // Survey insights based on route characteristics
   const getSurveyInsights = () => {
@@ -293,7 +338,7 @@ function InsightPanel({ result, lang = "en" }) {
       {surveyInsights.length > 0 && (
         <>
           <div className="insight-divider"></div>
-          <div className="card__eyebrow card__eyebrow--inline">Survey analysis · 32 experts · 461 routes</div>
+          <div className="card__eyebrow card__eyebrow--inline">{TUI.surveyAnalysis}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "8px" }}>
             {surveyInsights.map((si, i) => (
               <div key={i} style={{ 
@@ -318,7 +363,7 @@ function InsightPanel({ result, lang = "en" }) {
       )}
       
       <div className="insight-divider"></div>
-      <div className="card__eyebrow card__eyebrow--inline">Optimisation suggestions</div>
+      <div className="card__eyebrow card__eyebrow--inline">{TUI.optimizationSuggestions}</div>
       <ol className="suggestions">
         {suggestions.map((s, i) => (
           <li key={i} className="suggestion">

@@ -124,6 +124,74 @@ window.TRANSLATIONS = {
     },
     routeLabels: {},   // English labels come from engine.js directly
     routeDescs:  {},
+    ui: {
+      segmentBreakdown: "Segment breakdown",
+      containerComparison: "Container comparison",
+      optimizationSuggestions: "Optimisation suggestions",
+      surveyAnalysis: "Survey analysis · 32 experts · 461 routes",
+      noRiskZones: "No high-risk zones intersected",
+      noRiskZonesSub: "The sea segment of this route stays clear of all monitored chokepoints.",
+      riskCorridor: "risk corridor",
+      lowest: "Lowest",
+      vsSelected: "vs selected",
+      distLabel: "Distance",
+      mainModeLabel: "Main mode",
+      pickup: "Pickup", pol: "POL", pod: "POD", delivery: "Delivery",
+    },
+    regulatoryTimeline: [
+      { year: "2024", tag: "active", title: "CSRD · Corporate Sustainability Reporting",
+        body: "Large EU companies (and non-EU with EU revenue) must disclose Scope 1/2/3 emissions to ESRS standards. Automotive OEMs cascade this to Tier-1 & Tier-2 suppliers — Türkiye exporters now face structured carbon-data requests from their German and Italian buyers.",
+        touches: "Affects every lane in this tool — Scope 3 transport data becomes a contract requirement." },
+      { year: "2026", tag: "tightening", title: "CBAM definitive period + Euro 7",
+        body: "Carbon Border Adjustment Mechanism leaves its transitional phase: importers of iron, steel, aluminium, cement, fertilisers, hydrogen and electricity surrender certificates at the EU ETS price. Euro 7 enters force in stages from late 2026.",
+        touches: "Steel & aluminium components shipped on these lanes carry a CBAM cost on top of transport cost." },
+      { year: "2027", tag: "new-cost", title: "ETS2 · Road transport carbon price",
+        body: "A second EU Emissions Trading System covers road transport and buildings fuels. Diesel prices for HGVs rise by an expected €0.10–0.20/litre — the long-haul Balkan road corridor is the most exposed.",
+        touches: "The all-road Germany Export lane becomes ~12–18 % more expensive overnight." },
+      { year: "2025–2030", tag: "tightening", title: "HDV CO₂ standards · −15% → −45%",
+        body: "EU Regulation 2024/1610 forces truck manufacturers to cut new-vehicle fleet CO₂ by 45 % vs 2019 by 2030, 65 % by 2035, 90 % by 2040. Drives mass deployment of battery-electric & H₂ trucks on EU corridors.",
+        touches: "By 2030 the Trieste–Munich tail is a realistic candidate for fully zero-emission electric haulage." },
+      { year: "2025–2035", tag: "tightening", title: "FuelEU Maritime · cleaner ship fuels",
+        body: "GHG intensity of energy used by ships above 5 000 GT calling at EU ports must drop −2 % (2025), −6 % (2030), −14.5 % (2035) → −80 % by 2050. Combined with EU ETS on maritime, shipping lines pass cost into freight rates.",
+        touches: "All container & RoRo lanes in this tool carry a small but rising surcharge for ETS Maritime." },
+      { year: "2035", tag: "ban", title: "100 % zero-emission new cars and vans",
+        body: "Regulation (EU) 2023/851: from 1 January 2035 every new passenger car or light commercial vehicle registered in the EU must emit zero CO₂ at the tailpipe. The internal combustion engine ends its commercial life for new EU sales.",
+        touches: "Transforms what Türkiye exports to the EU — battery packs, e-axles & EV body parts replace ICE-only components." },
+      { year: "2040–2050", tag: "long", title: "Climate-neutral logistics",
+        body: "European Green Deal target: net-zero economy by 2050. The Sustainable & Smart Mobility Strategy plans a 90 % cut in transport emissions and a doubling of rail freight by 2050.",
+        touches: "Modal-shift away from road becomes a structural feature of every EU automotive flow." },
+    ],
+    frameworks: [
+      { code: "ISO 14083", name: "Transport chain emissions", body: "International standard published in 2023 that fixes the math for calculating GHG emissions of passenger and freight transport chains. Replaces EN 16258 and harmonises the well-to-wheel approach used throughout this tool.", use: "Used here: every EF in the engine." },
+      { code: "GLEC v3.1", name: "Smart Freight Centre framework", body: "The industry implementation of ISO 14083: provides default emission factors, modal allocation rules and data quality scoring. Required by most Tier-1 automotive Scope 3 reporting tools (e.g. Catena-X).", use: "Used here: payload defaults & modal hierarchy." },
+      { code: "SBTi · Auto", name: "Science-Based Targets — automotive guidance", body: "Sets the 1.5 °C-aligned trajectory for OEMs and their suppliers: linear absolute reduction of well-to-wheel emissions from sold vehicles of roughly −4.2 % per year. Many EU OEMs flow this down to Türkiye Tier-1s as contractual KPIs.", use: "Used here: implicit target line in the analytics view." },
+    ],
+    levers: [
+      { rank: 1, title: "Modal shift to RoRo + rail via Trieste", saving: "−45 to −60 %", body: "Replace long-haul Balkan road with Çeşme→Trieste RoRo + Tauern rail. Largest single-step CO₂ cut available in this catalogue today." },
+      { rank: 2, title: "Slow-steaming on the Suez corridor", saving: "−10 to −20 %", body: "Drop service speed from 22 to 18 knots between Singapore and Suez. No CapEx, only schedule discipline." },
+      { rank: 3, title: "Biofuels & e-methanol on short-sea lanes", saving: "−25 to −80 %", body: "FuelEU Maritime makes this cheaper each year. Several Trieste–Türkiye operators already offer B30 biofuel surcharge options." },
+      { rank: 4, title: "Battery-electric drayage to ESBAŞ", saving: "−95 %", body: "The 60 km ESBAŞ↔Aliağa and 80 km ESBAŞ↔Çeşme legs are well within the range of current EU-spec electric trucks." },
+      { rank: 5, title: "Container load consolidation", saving: "−5 to −12 %", body: "Push average 40FT loading from ~26 t to ~28.5 t (40HC). Pure logistics planning gain — no infrastructure required." },
+    ],
+    insightsSections: {
+      s3eyebrow: "03 · Frameworks", s3title: "Three accounting frameworks worth knowing",
+      s3sub: "How emissions on these lanes get measured, audited and reported",
+      s4eyebrow: "04 · Levers", s4title: "Five levers a Tier-1 supplier can actually pull",
+      s4sub: "Ordered by impact-per-effort for the Türkiye→EU automotive corridor",
+      s5eyebrow: "05 · Applied", s5title: "Your lanes ranked by climate readiness",
+      s5sub: "Lowest-CO₂ option per trade lane is highlighted as the \"ready\" pick",
+      readyNote: "Open the Routing tab to recompute each lane at different container sizes, or the Analytics tab for the full scatter of distance vs CO₂.",
+      sourcesLabel: "Sources & further reading",
+      bestIn: "Annual fleet CO₂ at",
+      perContainer: "Per container",
+      at: "At",
+      perYr: "/yr",
+    },
+    containerDescs: {
+      "20FT": "Standard 20-foot dry container. Common for dense cargo.",
+      "40FT": "Standard 40-foot dry. The workhorse of containerised freight.",
+      "40HC": "40-foot high-cube. Extra height for volumetric cargo.",
+    },
   },
 
   tr: {
@@ -280,5 +348,111 @@ window.TRANSLATIONS = {
       "it_imp_sea":        "Konteyner gemisi Cenova → Aliağa.",
       "it_imp_roro":       "Kamyon Milano → Trieste, RoRo Çeşme'ye.",
     },
+    ui: {
+      segmentBreakdown: "Segment Dökümü",
+      containerComparison: "Konteyner Karşılaştırması",
+      optimizationSuggestions: "Optimizasyon Önerileri",
+      surveyAnalysis: "Anket Analizi · 32 uzman · 461 rota",
+      noRiskZones: "Yüksek riskli bölge geçişi yok",
+      noRiskZonesSub: "Bu rotanın deniz segmenti tüm izlenen kritik noktaların dışında kalır.",
+      riskCorridor: "risk koridoru",
+      lowest: "En Düşük",
+      vsSelected: "seçilene kıyasla",
+      distLabel: "Mesafe",
+      mainModeLabel: "Ana Mod",
+      pickup: "Teslim Alma", pol: "POL", pod: "POD", delivery: "Teslimat",
+    },
+    regulatoryTimeline: [
+      { year: "2024", tag: "active", title: "CSRD · Kurumsal Sürdürülebilirlik Raporlaması",
+        body: "Büyük AB şirketleri (ve AB geliri olan AB dışı şirketler) Kapsam 1/2/3 emisyonlarını ESRS standartlarına göre açıklamak zorundadır. Otomotiv OEM'leri bu yükümlülüğü Kademe-1 ve Kademe-2 tedarikçilere yansıtır — Türkiye ihracatçıları artık Alman ve İtalyan alıcılarından yapılandırılmış karbon veri talepleriyle karşılaşmaktadır.",
+        touches: "Bu araçtaki her hattı etkiler — Kapsam 3 taşıma verileri bir sözleşme gereksinimi haline gelir." },
+      { year: "2026", tag: "tightening", title: "CBAM Kesin Dönem + Euro 7",
+        body: "Karbon Sınır Düzenleme Mekanizması geçiş döneminden çıkar: demir, çelik, alüminyum, çimento, gübre, hidrojen ve elektrik ithalatçıları AB ETS fiyatından sertifika teslim eder. Euro 7 (araç emisyon sınırları) 2026 sonundan itibaren aşamalı olarak yürürlüğe girer.",
+        touches: "Bu hatlarda taşınan çelik ve alüminyum bileşenler, taşıma maliyetine ek CBAM maliyeti yükler." },
+      { year: "2027", tag: "new-cost", title: "ETS2 · Karayolu Taşımacılığı Karbon Fiyatı",
+        body: "İkinci bir AB Emisyon Ticaret Sistemi karayolu taşımacılığı ve bina yakıtlarını kapsar. TIR dizel fiyatları beklenen €0,10–0,20/litre artışla yükselir — uzun mesafeli Balkan kara koridoru en fazla etkilenir.",
+        touches: "Yalnızca karayolu kullanan Almanya İhracat hattı bir gecede ~%12–18 daha pahalı hale gelir." },
+      { year: "2025–2030", tag: "tightening", title: "HDV CO₂ Standartları · −%15 → −%45",
+        body: "AB Tüzüğü 2024/1610, kamyon üreticilerini 2019'a kıyasla yeni araç filosu CO₂'sini 2030'a kadar %45, 2035'e kadar %65, 2040'a kadar %90 oranında azaltmaya zorlar. AB koridorlarında elektrikli ve H₂ kamyonların toplu kullanımını hızlandırır.",
+        touches: "2030'a kadar Trieste–Münih bacağı tam sıfır emisyonlu elektrikli taşıma için gerçekçi bir aday haline gelir." },
+      { year: "2025–2035", tag: "tightening", title: "FuelEU Maritime · Temiz Gemi Yakıtları",
+        body: "AB limanlarına uğrayan 5.000 GT üzeri gemilerde kullanılan enerjinin sera gazı yoğunluğu −%2 (2025), −%6 (2030), −%14,5 (2035) → 2050'de −%80 oranında düşmek zorundadır. Denizcilik ETS ile birleşince navlun ücretlerine yansır.",
+        touches: "Bu araçtaki tüm konteyner ve RoRo hatları küçük ama giderek artan bir ETS Denizcilik ek ücreti taşır." },
+      { year: "2035", tag: "ban", title: "%100 Sıfır Emisyonlu Yeni Araç ve Kamyonetler",
+        body: "AB Tüzüğü 2023/851: 1 Ocak 2035'ten itibaren AB'de tescil edilen her yeni binek araç veya hafif ticari aracın egzozda sıfır CO₂ yayması gerekir. İçten yanmalı motor yeni AB satışlarındaki ticari yaşamını sona erdirir.",
+        touches: "Türkiye'nin AB'ye ihraç ettiklerini dönüştürür — batarya takımları, e-akslar ve EV gövde parçaları ICE bileşenlerinin yerini alır." },
+      { year: "2040–2050", tag: "long", title: "İklim Nötr Lojistik",
+        body: "Avrupa Yeşil Mutabakatı hedefi: Kamu hukuku bağlayıcılığı olan İklim Yasası ile 2050'ye kadar net sıfır ekonomi. Sürdürülebilir & Akıllı Hareketlilik Stratejisi, taşıma emisyonlarında %90 azalma ve 2050'ye kadar demiryolu yükünü iki katına çıkarmayı öngörür.",
+        touches: "Karayolundan uzaklaşan modal kayma her AB otomotiv akışının yapısal bir özelliği haline gelir." },
+    ],
+    frameworks: [
+      { code: "ISO 14083", name: "Taşıma zinciri emisyonları", body: "2023'te yayımlanan bu uluslararası standart, yolcu ve yük taşıma zincirlerinin sera gazı emisyonlarını hesaplama yöntemini belirler. Eski EN 16258'in yerini alır ve bu araçta kullanılan kuyudan tekere yaklaşımını uyumlu kılar.", use: "Burada kullanımı: motordaki her EF." },
+      { code: "GLEC v3.1", name: "Akıllı Yük Merkezi çerçevesi", body: "ISO 14083'ün sektör uygulaması: varsayılan emisyon faktörleri, modal tahsis kuralları ve veri kalitesi puanlaması sağlar. Çoğu Kademe-1 otomotiv Kapsam 3 raporlama aracında (örn. Catena-X) gereklidir.", use: "Burada kullanımı: yük varsayılanları ve modal hiyerarşi." },
+      { code: "SBTi · Auto", name: "Bilime Dayalı Hedefler — otomotiv rehberi", body: "OEM'ler ve tedarikçileri için 1,5 °C uyumlu yolu belirler: satılan araçlardan kuyudan tekere emisyonlarda yıllık yaklaşık −%4,2 mutlak azalma. Pek çok AB OEM'i bunu Türkiye Kademe-1 tedarikçilerine sözleşme KPI'ı olarak yansıtır.", use: "Burada kullanımı: analiz görünümündeki örtülü hedef çizgisi." },
+    ],
+    levers: [
+      { rank: 1, title: "Trieste üzerinden RoRo + demiryoluna modal kayma", saving: "−%45 ile −%60", body: "Uzun mesafeli Balkan karayolunu Çeşme→Trieste RoRo + Tauern demiryoluyla değiştirin. Bugün bu katalogda mevcut en büyük tek adımlı CO₂ kesintisi." },
+      { rank: 2, title: "Süveyş koridorunda yavaş seyrüsefer", saving: "−%10 ile −%20", body: "Singapur ile Süveyş arasındaki servis hızını 22'den 18 knot'a düşürün. Sermaye harcaması yok, yalnızca program disiplini." },
+      { rank: 3, title: "Kısa mesafeli hatlarda biyoyakıt ve e-metanol", saving: "−%25 ile −%80", body: "FuelEU Maritime bunu her yıl daha ucuz hale getirir. Birkaç Trieste–Türkiye operatörü halihazırda B30 biyoyakıt ek ücreti seçeneği sunmaktadır." },
+      { rank: 4, title: "ESBAŞ'a elektrikli taşıma", saving: "−%95", body: "ESBAŞ↔Aliağa 60 km ve ESBAŞ↔Çeşme 80 km bacakları, mevcut AB spesifikasyonlu elektrikli kamyonların menzili içindedir." },
+      { rank: 5, title: "Konteyner yük konsolidasyonu", saving: "−%5 ile −%12", body: "Ortalama 40FT yüklemesini ~26 t'dan ~28,5 t'a (40HC) çıkarın. Altyapı gerektirmeyen saf lojistik planlama kazanımı." },
+    ],
+    insightsSections: {
+      s3eyebrow: "03 · Çerçeveler", s3title: "Bilinmesi gereken üç muhasebe çerçevesi",
+      s3sub: "Bu hatlardaki emisyonların nasıl ölçüldüğü, denetlendiği ve raporlandığı",
+      s4eyebrow: "04 · Kaldıraçlar", s4title: "Kademe-1 tedarikçinin gerçekten kullanabileceği beş kaldıraç",
+      s4sub: "Türkiye→AB otomotiv koridoru için etki/çaba sırasına göre",
+      s5eyebrow: "05 · Uygulama", s5title: "Hatlarınız iklim hazırlığına göre sıralandı",
+      s5sub: "Ticaret koridoru başına en düşük CO₂ seçeneği \"hazır\" olarak vurgulanır",
+      readyNote: "Her hattı farklı konteyner boyutlarında yeniden hesaplamak için Rota sekmesini, mesafe-CO₂ dağılımının tamamı için Analiz sekmesini açın.",
+      sourcesLabel: "Kaynaklar ve ileri okuma",
+      bestIn: "Yıllık filo CO₂ —",
+      perContainer: "Konteyner başına",
+      at: "At",
+      perYr: "/yıl",
+    },
+    containerDescs: {
+      "20FT": "Standart 20 fit kuru konteyner. Yoğun yükler için yaygın kullanım.",
+      "40FT": "Standart 40 fit kuru. Konteynerize yükün temel aracı.",
+      "40HC": "40 fit yüksek küp. Hacimsel yükler için ekstra yükseklik.",
+    },
   },
+};
+
+// ─── Turkish insight generator (mirrors engine.js generateInsight) ─────────
+window.generateInsightTR = function(routeType, distance, riskLevel, modes, risks) {
+  const isLong = distance > 12000;
+  const fmt = n => Math.round(n).toLocaleString("tr-TR");
+  if (routeType.includes("Suez") || routeType.includes("Süveyş")) return {
+    insight: `Süveyş Kanalı üzerinden birincil Asya–Avrupa koridoru (${fmt(distance)} km). En hızlı deniz seçeneği ancak Aden Körfezi dahil ${riskLevel.toLowerCase()} riskli bölgelerden geçer.`,
+    suggestions: ["Süveyş koşulları kötüleşirse Ümit Burnu yedek planını devreye alın.", "Malakka ile Aden arasında yavaş seyrüsefer yaparak yakıt tüketimini %20'ye kadar azaltın.", "Aden Körfezi geçişi için Savaş Riski sigortasını önceden ayarlayın."]
+  };
+  if (routeType.includes("Cape") || routeType.includes("Ümit Burnu")) return {
+    insight: `Ümit Burnu rotası Süveyş'i tamamen devre dışı bırakır (${fmt(distance)} km), tüm yüksek riskli bölge maruziyetini ek mesafe maliyetiyle ortadan kaldırır.`,
+    suggestions: ["Süveyş ek ücretleri veya korsanlık riski kanalı elverişsiz kıldığında tercih edin.", "Süveyş koridoruna kıyasla 7–10 günlük ek transit süreye hazırlıklı olun.", "Daha yüksek CO₂ — ESG raporlaması için karbon denkleştirme değerlendirin."]
+  };
+  if (routeType.includes("BRI") || routeType.includes("BTK") || routeType.includes("Orta Koridor")) return {
+    insight: `Trans-Hazar Orta Koridor demiryolu (${fmt(distance)} km) Kazakistan, Hazar Denizi, Güney Kafkasya ve BTK demiryoluyla Türkiye'ye ulaşır — sıfır deniz riski.`,
+    suggestions: ["Zamana duyarlı, yüksek değerli otomotiv parçaları için en iyi seçenek.", "Bilinen bir darboğaz olan Aktau–Bakü Hazar feribot kapasitesini izleyin.", "İki hat genişliği değişimi için planlama yapın (Çin/Kazakistan & Gürcistan/Türkiye)."]
+  };
+  if (modes.includes("rail") && (routeType.includes("Rail") || routeType.includes("Demiryolu"))) return {
+    insight: `Demiryolu ana hatlı intermodal rota (${fmt(distance)} km). Karasal demiryolu, eşdeğer bir kara yolu segmentine kıyasla CO₂'yi genellikle %60–70 oranında düşürür.`,
+    suggestions: ["Tauern / Brenner koridorları için önceden blok tren rezervasyonu yapın.", "Drayajı en aza indirmek için Trieste'nin RFI liman demiryolunu kullanın.", "ETS2 (2027) kamyon bacaklarına karbon maliyeti katacak — demiryolu payı iyileşecek."]
+  };
+  if (modes.includes("roro")) return {
+    insight: `Adriyatik havzası içinde kısa mesafeli RoRo koridoru (${fmt(distance)} km). ${riskLevel} risk. Günlük Çeşme–Trieste seferleri tekerlekli yük için esnek program sunar.`,
+    suggestions: ["RoRo konteyner elleçlemeyi ortadan kaldırır — bitmiş araçlar ve treyler için idealdir.", "Trieste iç hatlarda doğrudan A4/A23 otoyolu ve Tauern demiryolu erişimine sahiptir.", "Maliyet verimliliği için bu yüksek frekanslı hatta yüklemeleri birleştirin."]
+  };
+  if (modes.every(m => m === "road") && isLong) return {
+    insight: `Balkan koridoru üzerinden uzun mesafeli kara yolu (${fmt(distance)} km). Karayolunun emisyon yoğunluğu en yüksektir ve 2027'den itibaren ETS2 karbon fiyatlandırmasına maruz kalır.`,
+    suggestions: ["Kara yolu kilometresini azaltmak için Viyana veya Sofya'da demiryoluna geçin.", "Çok ülkeli transit izinleri için önceden düzenleme yapın.", "İntermodal (kara + demir) maliyet ve CO₂'yi %30–40 oranında azaltabilir."]
+  };
+  if (modes.includes("sea") && !isLong) return {
+    insight: `Akdeniz deniz rotası (${fmt(distance)} km), havza içinde kalır. Türkiye ile batı Akdeniz arasındaki yük için doğrudan ve verimli bir seçenek.`,
+    suggestions: ["Konteyner doluluk oranını optimize etmek için diğer Akdeniz nakliyecileriyle birleştirin.", "Kısa transit süresi, hızlı tüketim malları için bu rotayı idealleştirir.", "Daha iyi program kapsamı için aktarma limanları üzerinden besleyici gemiler değerlendirin."]
+  };
+  return {
+    insight: `Bu rota ${fmt(distance)} km'yi ${modes.join(" + ")} taşımacılığıyla ${riskLevel.toLowerCase()} genel riskle kat eder.`,
+    suggestions: ["Daha düşük emisyonlu alternatifler için modal dağılımı gözden geçirin.", "Kargo sigortasının tüm taşıma modlarını kapsadığından emin olun.", "Maliyet verimliliğini artırmak için konsolidasyon fırsatlarını değerlendirin."]
+  };
 };
