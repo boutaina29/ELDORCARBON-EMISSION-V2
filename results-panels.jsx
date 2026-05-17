@@ -8,16 +8,17 @@ function pct(v, max) { return Math.max(2, Math.round((v / Math.max(max, 1)) * 10
 function fmtT(v) { return (v / 1000).toFixed(2); }
 
 // ─── KPI strip ────────────────────────────────────────────
-function KpiStrip({ result }) {
+function KpiStrip({ result, lang = "en" }) {
   if (!result) return null;
   const { distance, emissions, containerType, modes, isBRI } = result;
+  const TK = window.TRANSLATIONS[lang].kpi;
   const intensity = (emissions.co2Total / Math.max(distance, 1)).toFixed(2);
   const efDisplay = isBRI ? "46.0" : emissions.efMain;
   const kpis = [
-    { label: "Total distance", val: distance.toLocaleString(), unit: "km", sub: "across all legs" },
-    { label: "Total CO₂e", val: fmtT(emissions.co2Total), unit: "tonnes", sub: `${emissions.co2Total.toLocaleString()} kg` },
-    { label: "Emission intensity", val: intensity, unit: "kg / km", sub: `EF ${efDisplay} g/t-km` },
-    { label: "Container payload", val: emissions.cargoWeight.toFixed(2), unit: "t", sub: `${containerType} avg payload` },
+    { label: TK.totalDist, val: distance.toLocaleString(), unit: "km", sub: TK.allLegs },
+    { label: TK.totalCO2, val: fmtT(emissions.co2Total), unit: TK.tonnes, sub: `${emissions.co2Total.toLocaleString()} kg` },
+    { label: TK.intensity, val: intensity, unit: "kg / km", sub: `EF ${efDisplay} g/t-km` },
+    { label: TK.payload, val: emissions.cargoWeight.toFixed(2), unit: "t", sub: `${containerType} ${TK.avgPayload}` },
   ];
   return (
     <div className="kpi-strip">
@@ -36,9 +37,10 @@ function KpiStrip({ result }) {
 }
 
 // ─── Emissions panel ──────────────────────────────────────
-function EmissionsPanel({ emissions, containerType }) {
+function EmissionsPanel({ emissions, containerType, lang = "en" }) {
   const E = window.RoutingEngine.ECOTRANSIT;
   const SEG = window.SEG_STYLE;
+  const TE = window.TRANSLATIONS[lang].emissions;
   const {
     co2Total, co2Main, co2Inland, co2Road1, co2Road2,
     mainMode, inlandMode, distMain, distInland, distRoad1, distRoad2,
@@ -58,18 +60,18 @@ function EmissionsPanel({ emissions, containerType }) {
   const bestTotal = Math.min(...others.map(o => o.total));
 
   const rows = [
-    distRoad1 > 0 && { name: "Pre-carriage", sub: `Pickup → POL · ${distRoad1.toLocaleString()} km · road`, val: co2Road1, color: SEG.road.color, glyph: "—" },
-    distMain  > 0 && { name: "Main transport", sub: `${mainMode.toUpperCase()} · ${distMain.toLocaleString()} km`, val: co2Main, color: mainColor, glyph: window.MODE_GLYPH[mainMode] },
-    inlandMode && distInland > 0 && { name: "Inland mainline", sub: `${inlandMode.toUpperCase()} · ${distInland.toLocaleString()} km`, val: co2Inland, color: inlandColor, glyph: window.MODE_GLYPH[inlandMode] },
-    distRoad2 > 0 && { name: "On-carriage", sub: `POD → Delivery · ${distRoad2.toLocaleString()} km · road`, val: co2Road2, color: SEG.road.color, glyph: "—" },
+    distRoad1 > 0 && { name: TE.preCarriage, sub: `${TE.pickupPOL} · ${distRoad1.toLocaleString()} km · ${TE.road}`, val: co2Road1, color: SEG.road.color, glyph: "—" },
+    distMain  > 0 && { name: TE.mainTransport, sub: `${mainMode.toUpperCase()} · ${distMain.toLocaleString()} km`, val: co2Main, color: mainColor, glyph: window.MODE_GLYPH[mainMode] },
+    inlandMode && distInland > 0 && { name: TE.inlandMainline, sub: `${inlandMode.toUpperCase()} · ${distInland.toLocaleString()} km`, val: co2Inland, color: inlandColor, glyph: window.MODE_GLYPH[inlandMode] },
+    distRoad2 > 0 && { name: TE.onCarriage, sub: `${TE.podDelivery} · ${distRoad2.toLocaleString()} km · ${TE.road}`, val: co2Road2, color: SEG.road.color, glyph: "—" },
   ].filter(Boolean);
 
   return (
     <div className="card card--emissions">
       <div className="card__head">
         <div>
-          <div className="card__eyebrow">02 · Emissions</div>
-          <h3 className="card__title">Well-to-wheel carbon footprint</h3>
+          <div className="card__eyebrow">{TE.eyebrow}</div>
+          <h3 className="card__title">{TE.title}</h3>
           <div className="card__sub">EcoTransit · ISO 14083 · payload {cargoWeight.toFixed(2)} t · EF {efMain} g CO₂e/t-km</div>
         </div>
         <div className="big-num">
@@ -106,7 +108,7 @@ function EmissionsPanel({ emissions, containerType }) {
               <div key={o.type} className={`compare-row ${o.isSelected ? "is-selected" : ""}`}>
                 <div className="compare-row__head">
                   <span className="compare-row__type">{o.type}</span>
-                  {o.isSelected && <span className="compare-row__tag">Selected</span>}
+                  {o.isSelected && <span className="compare-row__tag">{TE.selected}</span>}
                   {isBest && <span className="compare-row__tag compare-row__tag--best">Lowest</span>}
                   <span className="compare-row__sub">{E.cargoWeight[o.type]} t payload</span>
                 </div>
@@ -129,9 +131,10 @@ function EmissionsPanel({ emissions, containerType }) {
 }
 
 // ─── Route Legs ───────────────────────────────────────────
-function LegsPanel({ result }) {
+function LegsPanel({ result, lang = "en" }) {
   const { legs, modes, distance, emissions } = result;
   const SEG = window.SEG_STYLE;
+  const TR = window.TRANSLATIONS[lang].route;
   const items = [
     { kind: "pickup",   label: "Pickup",   name: legs.pickup,   color: "#0d0f12" },
     { kind: "pol",      label: "POL",      name: legs.pol,      color: "#1d4275" },
@@ -142,8 +145,8 @@ function LegsPanel({ result }) {
     <div className="card card--legs">
       <div className="card__head">
         <div>
-          <div className="card__eyebrow">01 · Itinerary</div>
-          <h3 className="card__title">Route legs</h3>
+          <div className="card__eyebrow">{TR.eyebrow}</div>
+          <h3 className="card__title">{TR.title}</h3>
         </div>
         <div className="mode-chips">
           {modes.map(m => (
@@ -185,15 +188,16 @@ function LegsPanel({ result }) {
 }
 
 // ─── Risk panel ───────────────────────────────────────────
-function RiskPanel({ result }) {
+function RiskPanel({ result, lang = "en" }) {
   const { risks, riskLevel } = result;
   const RC = window.RISK_COLOR;
+  const TRISK = window.TRANSLATIONS[lang].risk;
   return (
     <div className="card card--risk" style={{ "--accent": RC[riskLevel] }}>
       <div className="card__head">
         <div>
-          <div className="card__eyebrow">03 · Geopolitical risk</div>
-          <h3 className="card__title">Maritime exposure</h3>
+          <div className="card__eyebrow">{TRISK.eyebrow}</div>
+          <h3 className="card__title">{TRISK.title}</h3>
         </div>
         <div className={`risk-badge risk-badge--${riskLevel.toLowerCase()}`}>{riskLevel}</div>
       </div>
@@ -221,8 +225,9 @@ function RiskPanel({ result }) {
 }
 
 // ─── Insight + suggestions ────────────────────────────────
-function InsightPanel({ result }) {
+function InsightPanel({ result, lang = "en" }) {
   const { insight, suggestions } = result;
+  const TINS = window.TRANSLATIONS[lang].insight;
   
   // Survey insights based on route characteristics
   const getSurveyInsights = () => {
@@ -282,7 +287,7 @@ function InsightPanel({ result }) {
   
   return (
     <div className="card card--insight">
-      <div className="card__eyebrow">04 · Professional insight</div>
+      <div className="card__eyebrow">{TINS.eyebrow}</div>
       <p className="insight-body">{insight}</p>
       
       {surveyInsights.length > 0 && (
@@ -326,17 +331,17 @@ function InsightPanel({ result }) {
   );
 }
 
-function ResultsPanel({ result }) {
+function ResultsPanel({ result, lang = "en" }) {
   if (!result) return null;
   return (
     <div className="results">
-      <KpiStrip result={result} />
+      <KpiStrip result={result} lang={lang} />
       <div className="results-grid">
-        <LegsPanel result={result} />
-        <RiskPanel result={result} />
+        <LegsPanel result={result} lang={lang} />
+        <RiskPanel result={result} lang={lang} />
       </div>
-      <EmissionsPanel emissions={result.emissions} containerType={result.containerType} />
-      <InsightPanel result={result} />
+      <EmissionsPanel emissions={result.emissions} containerType={result.containerType} lang={lang} />
+      <InsightPanel result={result} lang={lang} />
     </div>
   );
 }

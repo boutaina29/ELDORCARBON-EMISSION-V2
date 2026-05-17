@@ -3,10 +3,9 @@
 //  METHODOLOGY VIEW — EcoTransit + ISO 14083 deep dive
 // ════════════════════════════════════════════════════════════
 
-function MethodologyView() {
+function MethodologyView({ lang = "en" }) {
   const E = window.RoutingEngine.ECOTRANSIT;
-
-  const formula = "CO₂e = EF × payload × distance ÷ 1000";
+  const T = window.TRANSLATIONS[lang].methodology;
 
   // Worked example - Shanghai → ESBAŞ via Suez, 40FT
   const sampleRoute = window.RoutingEngine.PROJECT_ROUTES.find(r => r.id === "cn_suez_aliaga");
@@ -17,22 +16,15 @@ function MethodologyView() {
     <div className="methodology-view">
       <div className="view-header">
         <div>
-          <div className="view-header__eyebrow">Module 04</div>
-          <h2 className="view-header__title">Methodology — EcoTransit WTW</h2>
-          <p className="view-header__sub">
-            Every kilogram of CO₂ in this dashboard is calculated using the EcoTransit emission model, aligned with <strong>ISO 14083:2023</strong>—the international standard for quantifying greenhouse gas emissions from transport chains.
-          </p>
+          <div className="view-header__eyebrow">{T.eyebrow}</div>
+          <h2 className="view-header__title">{T.title}</h2>
+          <p className="view-header__sub">{T.sub}</p>
         </div>
       </div>
 
       {/* Step pipeline */}
       <div className="meth-pipeline">
-        {[
-          { n: "01", t: "Identify segments", d: "Decompose route into pickup → POL → POD → delivery legs." },
-          { n: "02", t: "Assign modes & EFs", d: "Pull EcoTransit emission factor per mode (g CO₂e per t-km)." },
-          { n: "03", t: "Apply payload", d: "Multiply by container average payload (ISO standard)." },
-          { n: "04", t: "Sum & report", d: "Aggregate WTW (well-to-wheel) emissions across all legs." },
-        ].map(s => (
+        {T.steps.map(s => (
           <div key={s.n} className="meth-step">
             <div className="meth-step__num">{s.n}</div>
             <div className="meth-step__title">{s.t}</div>
@@ -45,8 +37,8 @@ function MethodologyView() {
       <div className="card card--formula">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">The formula</div>
-            <h3 className="card__title">Core calculation per segment</h3>
+            <div className="card__eyebrow">{T.formulaEyebrow}</div>
+            <h3 className="card__title">{T.formulaTitle}</h3>
           </div>
           <div className="formula-iso">
             <span className="formula-iso__chip">ISO 14083</span>
@@ -99,18 +91,18 @@ function MethodologyView() {
         <div className="card">
           <div className="card__head">
             <div>
-              <div className="card__eyebrow">Emission factors</div>
-              <h3 className="card__title">Per transport mode</h3>
-              <div className="card__sub">g CO₂e per tonne-kilometre · WTW basis</div>
+              <div className="card__eyebrow">{T.efEyebrow}</div>
+              <h3 className="card__title">{T.efTitle}</h3>
+              <div className="card__sub">{T.efSub}</div>
             </div>
           </div>
           <div className="ef-table">
             {[
-              { mode: "Sea (container vessel)", ef: E.factors.sea, color: "var(--ocean)", note: "Lowest intensity; ideal for long-haul bulk." },
-              { mode: "Rail (European average)", ef: E.factors.rail, color: "var(--rust)", note: "Electric traction; low-carbon for inland." },
-              { mode: "Rail (BRI Trans-Caspian)", ef: E.factors.railBRI, color: "var(--rust)", note: "Higher EF — diesel + gauge breaks." },
-              { mode: "RoRo (short-sea ferry)", ef: E.factors.roro, color: "var(--plum)", note: "Roll-on/roll-off · medium intensity." },
-              { mode: "Road (heavy truck)", ef: E.factors.road, color: "var(--leaf)", note: "Highest intensity; door-to-door flex." },
+              { mode: "Sea (container vessel)", ef: E.factors.sea, color: "var(--ocean)", note: T.efNotes.sea },
+              { mode: "Rail (European average)", ef: E.factors.rail, color: "var(--rust)", note: T.efNotes.rail },
+              { mode: "Rail (BRI Trans-Caspian)", ef: E.factors.railBRI, color: "var(--rust)", note: T.efNotes.railBRI },
+              { mode: "RoRo (short-sea ferry)", ef: E.factors.roro, color: "var(--plum)", note: T.efNotes.roro },
+              { mode: "Road (heavy truck)", ef: E.factors.road, color: "var(--leaf)", note: T.efNotes.road },
             ].map((r, i) => {
               const maxEF = Math.max(E.factors.road, E.factors.roro);
               return (
@@ -135,9 +127,9 @@ function MethodologyView() {
         <div className="card">
           <div className="card__head">
             <div>
-              <div className="card__eyebrow">Container payloads</div>
-              <h3 className="card__title">Average cargo weight</h3>
-              <div className="card__sub">ISO container specs · midpoint of operational range</div>
+              <div className="card__eyebrow">{T.contEyebrow}</div>
+              <h3 className="card__title">{T.contTitle}</h3>
+              <div className="card__sub">{T.contSub}</div>
             </div>
           </div>
           <div className="cont-spec-list">
@@ -163,25 +155,25 @@ function MethodologyView() {
       <div className="card card--example">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">Worked example</div>
-            <h3 className="card__title">Shanghai → ESBAŞ via Suez · 40FT</h3>
-            <div className="card__sub">Every number in this dashboard is built from operations like this</div>
+            <div className="card__eyebrow">{T.exEyebrow}</div>
+            <h3 className="card__title">{T.exTitle}</h3>
+            <div className="card__sub">{T.exSub}</div>
           </div>
         </div>
         <div className="example-flow">
           {[
-            { 
-              n: 1, label: "Pre-carriage", mode: "Road", ef: E.factors.road,
+            {
+              n: 1, label: T.preCarriage, mode: "Road", ef: E.factors.road,
               dist: distRoad1, payload: cargoWeight, co2: co2Road1,
               segment: "Xi'an → Shanghai", color: "var(--leaf)"
             },
-            { 
-              n: 2, label: "Main transport", mode: "Sea", ef: E.factors.sea,
+            {
+              n: 2, label: T.mainTransport, mode: "Sea", ef: E.factors.sea,
               dist: distMain, payload: cargoWeight, co2: co2Main,
               segment: "Shanghai → Aliağa", color: "var(--ocean)"
             },
-            { 
-              n: 3, label: "On-carriage", mode: "Road", ef: E.factors.road,
+            {
+              n: 3, label: T.onCarriage, mode: "Road", ef: E.factors.road,
               dist: distRoad2, payload: cargoWeight, co2: co2Road2,
               segment: "Aliağa → ESBAŞ", color: "var(--leaf)"
             },
@@ -205,7 +197,7 @@ function MethodologyView() {
             </div>
           ))}
           <div className="ex-total">
-            <span className="ex-total__label">TOTAL CO₂e</span>
+            <span className="ex-total__label">{T.totalCO2}</span>
             <span className="ex-total__value">{sample.emissions.co2Total.toLocaleString()} kg</span>
             <span className="ex-total__sub">= {(sample.emissions.co2Total/1000).toFixed(3)} tonnes</span>
           </div>
@@ -217,29 +209,29 @@ function MethodologyView() {
         <div className="card">
           <div className="card__head">
             <div>
-              <div className="card__eyebrow">WTW vs TTW</div>
-              <h3 className="card__title">Why well-to-wheel matters</h3>
+              <div className="card__eyebrow">{T.wtwEyebrow}</div>
+              <h3 className="card__title">{T.wtwTitle}</h3>
             </div>
           </div>
           <div className="wtw-compare">
             <div className="wtw-side">
-              <div className="wtw-side__title">Tank-to-wheel (TTW)</div>
-              <div className="wtw-side__desc">Tailpipe emissions only — what comes out the exhaust during transport.</div>
-              <div className="wtw-side__cov">Covers: combustion only</div>
+              <div className="wtw-side__title">{T.ttwTitle}</div>
+              <div className="wtw-side__desc">{T.ttwDesc}</div>
+              <div className="wtw-side__cov">{T.ttwCov}</div>
             </div>
-            <div className="wtw-arrow">→ extends to →</div>
+            <div className="wtw-arrow">{T.wtwArrow}</div>
             <div className="wtw-side wtw-side--active">
-              <div className="wtw-side__title">Well-to-wheel (WTW)</div>
-              <div className="wtw-side__desc">Full lifecycle: fuel extraction, refining, distribution, AND combustion. Always 20–30% higher than TTW.</div>
-              <div className="wtw-side__cov">Covers: upstream + tailpipe</div>
+              <div className="wtw-side__title">{T.wtwTitle2}</div>
+              <div className="wtw-side__desc">{T.wtwDesc2}</div>
+              <div className="wtw-side__cov">{T.wtwCov2}</div>
             </div>
           </div>
         </div>
         <div className="card">
           <div className="card__head">
             <div>
-              <div className="card__eyebrow">Standards & sources</div>
-              <h3 className="card__title">Why these numbers can be trusted</h3>
+              <div className="card__eyebrow">{T.stdEyebrow}</div>
+              <h3 className="card__title">{T.stdTitle}</h3>
             </div>
           </div>
           <div className="standards-list">

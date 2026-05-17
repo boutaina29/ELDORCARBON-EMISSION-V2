@@ -3,11 +3,12 @@
 //  ANALYTICS VIEW — Side-by-side route comparison
 // ════════════════════════════════════════════════════════════
 
-function AnalyticsView() {
+function AnalyticsView({ lang = "en" }) {
   const { PROJECT_ROUTES, CONTAINER_TYPES } = window.RoutingEngine;
   const CATEGORIES = [...new Set(PROJECT_ROUTES.map(r => r.category))];
   const SEG = window.SEG_STYLE;
   const RC = window.RISK_COLOR;
+  const T = window.TRANSLATIONS[lang].analytics;
 
   const [category, setCategory] = React.useState(CATEGORIES[0]);
   const [container, setContainer] = React.useState("40FT");
@@ -28,18 +29,16 @@ function AnalyticsView() {
       {/* Header */}
       <div className="view-header">
         <div>
-          <div className="view-header__eyebrow">Module 02</div>
-          <h2 className="view-header__title">Route Analytics</h2>
-          <p className="view-header__sub">
-            Compare every route in a trade lane side-by-side. See which path delivers the lowest carbon footprint, shortest distance, and lowest geopolitical exposure.
-          </p>
+          <div className="view-header__eyebrow">{T.eyebrow}</div>
+          <h2 className="view-header__title">{T.title}</h2>
+          <p className="view-header__sub">{T.sub}</p>
         </div>
       </div>
 
       {/* Controls */}
       <div className="analytics-controls">
         <div className="ctrl-group">
-          <label className="ctrl-label">Trade lane</label>
+          <label className="ctrl-label">{T.tradeLane}</label>
           <div className="seg-tabs">
             {CATEGORIES.map(c => (
               <button
@@ -53,7 +52,7 @@ function AnalyticsView() {
           </div>
         </div>
         <div className="ctrl-group">
-          <label className="ctrl-label">Container</label>
+          <label className="ctrl-label">{T.container}</label>
           <div className="seg-tabs">
             {CONTAINER_TYPES.map(c => (
               <button
@@ -75,9 +74,9 @@ function AnalyticsView() {
           const lowDist = computed.find(c => c.result.distance === bestDist);
           const lowRisk = computed.find(c => c.result.riskLevel === "Low") || computed[0];
           return [
-            { eyebrow: "Lowest CO₂e", value: `${(lowCO2.result.emissions.co2Total/1000).toFixed(2)}`, unit: "t", route: lowCO2.def.label, color: "var(--leaf)" },
-            { eyebrow: "Shortest distance", value: lowDist.result.distance.toLocaleString(), unit: "km", route: lowDist.def.label, color: "var(--ocean)" },
-            { eyebrow: "Lowest risk exposure", value: lowRisk.result.riskLevel, unit: "", route: lowRisk.def.label, color: RC[lowRisk.result.riskLevel] },
+            { eyebrow: T.lowestCO2, value: `${(lowCO2.result.emissions.co2Total/1000).toFixed(2)}`, unit: "t", route: lowCO2.def.label, color: "var(--leaf)" },
+            { eyebrow: T.shortestDist, value: lowDist.result.distance.toLocaleString(), unit: "km", route: lowDist.def.label, color: "var(--ocean)" },
+            { eyebrow: T.lowestRisk, value: lowRisk.result.riskLevel, unit: "", route: lowRisk.def.label, color: RC[lowRisk.result.riskLevel] },
           ].map((w, i) => (
             <div key={i} className="winner-card" style={{ "--c": w.color }}>
               <div className="winner-card__eyebrow">{w.eyebrow}</div>
@@ -95,20 +94,20 @@ function AnalyticsView() {
       <div className="card">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">01 · Side-by-side</div>
-            <h3 className="card__title">Route comparison · {category}</h3>
-            <div className="card__sub">{computed.length} options · {container} container</div>
+            <div className="card__eyebrow">{T.s1eyebrow}</div>
+            <h3 className="card__title">{T.routeComparison} · {category}</h3>
+            <div className="card__sub">{computed.length} {T.options} · {container} container</div>
           </div>
         </div>
 
         <div className="comparison-table">
           <div className="ct-row ct-row--head">
-            <div className="ct-cell ct-cell--route">Route</div>
-            <div className="ct-cell ct-cell--modes">Modes</div>
-            <div className="ct-cell ct-cell--bar">Distance</div>
-            <div className="ct-cell ct-cell--bar">CO₂ emissions</div>
-            <div className="ct-cell ct-cell--risk">Risk</div>
-            <div className="ct-cell ct-cell--num">Intensity</div>
+            <div className="ct-cell ct-cell--route">{T.colRoute}</div>
+            <div className="ct-cell ct-cell--modes">{T.colModes}</div>
+            <div className="ct-cell ct-cell--bar">{T.colDist}</div>
+            <div className="ct-cell ct-cell--bar">{T.colCO2}</div>
+            <div className="ct-cell ct-cell--risk">{T.colRisk}</div>
+            <div className="ct-cell ct-cell--num">{T.colIntensity}</div>
           </div>
           {computed.map(({ def, result }) => {
             const co2 = result.emissions.co2Total;
@@ -138,7 +137,7 @@ function AnalyticsView() {
                   <div className="ct-bar__label">
                     {result.distance.toLocaleString()}
                     <em>km</em>
-                    {isLowestDist && <span className="ct-tag">Best</span>}
+                    {isLowestDist && <span className="ct-tag">{T.best}</span>}
                   </div>
                 </div>
                 <div className="ct-cell ct-cell--bar">
@@ -151,7 +150,7 @@ function AnalyticsView() {
                   <div className="ct-bar__label">
                     {(co2/1000).toFixed(2)}
                     <em>t</em>
-                    {isLowestCO2 && <span className="ct-tag">Best</span>}
+                    {isLowestCO2 && <span className="ct-tag">{T.best}</span>}
                   </div>
                 </div>
                 <div className="ct-cell ct-cell--risk">
@@ -173,9 +172,9 @@ function AnalyticsView() {
       <div className="card">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">02 · Emission anatomy</div>
-            <h3 className="card__title">Where does the CO₂ come from?</h3>
-            <div className="card__sub">Stacked by segment · pre-carriage, main transport, on-carriage</div>
+            <div className="card__eyebrow">{T.s2eyebrow}</div>
+            <h3 className="card__title">{T.emTitle}</h3>
+            <div className="card__sub">{T.emSub}</div>
           </div>
         </div>
         <div className="stacked-chart">
@@ -203,9 +202,9 @@ function AnalyticsView() {
             );
           })}
           <div className="stacked-legend">
-            <span><i style={{background: SEG.road.color}}></i> Pre-carriage (road)</span>
-            <span><i style={{background: "var(--ocean)"}}></i> Main transport</span>
-            <span><i style={{background: SEG.road.color, opacity: 0.7}}></i> On-carriage (road)</span>
+            <span><i style={{background: SEG.road.color}}></i> {T.preCarriage}</span>
+            <span><i style={{background: "var(--ocean)"}}></i> {T.mainTransport}</span>
+            <span><i style={{background: SEG.road.color, opacity: 0.7}}></i> {T.onCarriage}</span>
           </div>
         </div>
       </div>
@@ -214,12 +213,12 @@ function AnalyticsView() {
       <div className="card">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">03 · Trade-off</div>
-            <h3 className="card__title">Distance vs emissions</h3>
-            <div className="card__sub">Bottom-left quadrant = the sweet spot</div>
+            <div className="card__eyebrow">{T.s3eyebrow}</div>
+            <h3 className="card__title">{T.tradeoffTitle}</h3>
+            <div className="card__sub">{T.tradeoffSub}</div>
           </div>
         </div>
-        <ScatterChart computed={computed} maxCO2={maxCO2} maxDist={maxDist} />
+        <ScatterChart computed={computed} maxCO2={maxCO2} maxDist={maxDist} sweetSpot={T.sweetSpot} />
       </div>
     </div>
   );
@@ -242,7 +241,7 @@ function scatterLabel(s) {
     .trim();
 }
 
-function ScatterChart({ computed, maxCO2, maxDist }) {
+function ScatterChart({ computed, maxCO2, maxDist, sweetSpot = "SWEET SPOT" }) {
   const SEG = window.SEG_STYLE;
   // Wider viewBox gives the right-margin legend enough room
   const W = 820, H = 480, PAD = { l: 64, r: 260, t: 24, b: 54 };
@@ -302,7 +301,7 @@ function ScatterChart({ computed, maxCO2, maxDist }) {
       <rect x={PAD.l} y={PAD.t + iH * 0.5} width={iW * 0.5} height={iH * 0.5}
         fill="var(--leaf)" opacity="0.04" />
       <text x={PAD.l + iW * 0.25} y={PAD.t + iH * 0.92} textAnchor="middle"
-        fill="var(--leaf)" fontSize="11" fontWeight="600" opacity="0.5">SWEET SPOT</text>
+        fill="var(--leaf)" fontSize="11" fontWeight="600" opacity="0.5">{sweetSpot}</text>
       {/* Leader lines drawn first (under dots) */}
       {pts.map(({ def, cx, cy, color }, i) => {
         const ly = labelY(i) + 8;

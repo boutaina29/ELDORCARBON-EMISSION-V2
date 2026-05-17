@@ -6,23 +6,17 @@ const { useState: _useState, useEffect: _useEffect } = React;
 const { TweaksPanel, useTweaks, TweakSelect, TweakSection, TweakToggle, TweakSlider } = window;
 
 const CAT_META = {
-  "China Import":   { code: "CN→TR", color: "#1b7fb8", description: "Inbound from Greater China to İzmir." },
-  "Italy Export":   { code: "TR→IT", color: "#e66f2e", description: "Aliağa / ESBAŞ outbound to Italian hubs." },
-  "Germany Export": { code: "TR→DE", color: "#2d8f45", description: "Outbound to German manufacturing centres." },
-  "Italy Import":   { code: "IT→TR", color: "#8b5ba8", description: "Italian origins inbound to ESBAŞ." },
+  "China Import":   { code: "CN→TR", color: "#1b7fb8" },
+  "Italy Export":   { code: "TR→IT", color: "#e66f2e" },
+  "Germany Export": { code: "TR→DE", color: "#2d8f45" },
+  "Italy Import":   { code: "IT→TR", color: "#8b5ba8" },
 };
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"etsPriceEur":95,"annualContainers":600,"showRiskZones":true}/*EDITMODE-END*/;
 
-const NAV = [
-  { id: "routing",     label: "Routing" },
-  { id: "analytics",   label: "Analytics" },
-  { id: "reports",     label: "Insights" },
-  { id: "methodology", label: "Methodology" },
-];
-
-// ─── Routing view (the original main canvas) ───────────────
-function RoutingView({ tweaks }) {
+// ─── Routing view ──────────────────────────────────────────
+function RoutingView({ tweaks, lang }) {
+  const T = window.TRANSLATIONS[lang];
   const { PROJECT_ROUTES, CONTAINER_TYPES, CONTAINER_INFO } = window.RoutingEngine;
   const CATEGORIES = [...new Set(PROJECT_ROUTES.map(r => r.category))];
 
@@ -75,40 +69,33 @@ function RoutingView({ tweaks }) {
 
   return (
     <div className="body">
-      {/* Left configuration rail */}
       <aside className="rail">
         <div className="rail__sec">
-          <div className="rail__eyebrow">Step 01</div>
-          <div className="rail__heading">Trade lane</div>
+          <div className="rail__eyebrow">{T.routing.step1}</div>
+          <div className="rail__heading">{T.routing.tradeLane}</div>
           <div className="cat-tabs">
             {CATEGORIES.map(c => {
               const m = CAT_META[c];
               return (
-                <button
-                  key={c}
-                  onClick={() => handleCat(c)}
+                <button key={c} onClick={() => handleCat(c)}
                   className={`cat-tab ${category === c ? "is-active" : ""}`}
-                  style={{ "--c": m.color }}
-                >
+                  style={{ "--c": m.color }}>
                   <div className="cat-tab__code">{m.code}</div>
                   <div className="cat-tab__name">{c}</div>
                 </button>
               );
             })}
           </div>
-          <div className="rail__hint">{meta.description}</div>
+          <div className="rail__hint">{T.catDesc[category]}</div>
         </div>
 
         <div className="rail__sec">
-          <div className="rail__eyebrow">Step 02</div>
-          <div className="rail__heading">Route option ({catRoutes.length})</div>
+          <div className="rail__eyebrow">{T.routing.step2}</div>
+          <div className="rail__heading">{T.routing.routeOption} ({catRoutes.length})</div>
           <div className="route-list">
             {catRoutes.map(r => (
-              <button
-                key={r.id}
-                onClick={() => setRouteId(r.id)}
-                className={`route-card ${routeId === r.id ? "is-active" : ""}`}
-              >
+              <button key={r.id} onClick={() => setRouteId(r.id)}
+                className={`route-card ${routeId === r.id ? "is-active" : ""}`}>
                 <div className="route-card__top">
                   <div className="route-card__modes">
                     {r.modes.map(m => (
@@ -119,23 +106,24 @@ function RoutingView({ tweaks }) {
                   </div>
                   {routeId === r.id && <span className="route-card__check">✓</span>}
                 </div>
-                <div className="route-card__label">{r.label}</div>
-                <div className="route-card__desc">{r.description}</div>
+                <div className="route-card__label">
+                  {(T.routeLabels && T.routeLabels[r.id]) || r.label}
+                </div>
+                <div className="route-card__desc">
+                  {(T.routeDescs && T.routeDescs[r.id]) || r.description}
+                </div>
               </button>
             ))}
           </div>
         </div>
 
         <div className="rail__sec">
-          <div className="rail__eyebrow">Step 03</div>
-          <div className="rail__heading">Container</div>
+          <div className="rail__eyebrow">{T.routing.step3}</div>
+          <div className="rail__heading">{T.routing.container}</div>
           <div className="cont-tabs">
             {CONTAINER_TYPES.map(c => (
-              <button
-                key={c}
-                onClick={() => setContainer(c)}
-                className={`cont-tab ${container === c ? "is-active" : ""}`}
-              >
+              <button key={c} onClick={() => setContainer(c)}
+                className={`cont-tab ${container === c ? "is-active" : ""}`}>
                 <div className="cont-tab__type">{c}</div>
                 <div className="cont-tab__sub">{CONTAINER_INFO[c].short}</div>
               </button>
@@ -146,32 +134,33 @@ function RoutingView({ tweaks }) {
 
         <div className="rail__cta-wrap">
           <button onClick={compute} disabled={!ready || computing} className="cta">
-            <span>{computing ? "Calculating…" : "Compute route"}</span>
+            <span>{computing ? T.routing.computing : T.routing.compute}</span>
             <svg viewBox="0 0 16 16" fill="none">
               <path d="M2 8 H13 M9 4 L13 8 L9 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           <div className="rail__methodology">
-            <strong>Method</strong> · Hand-verified maritime corridors interpolated at 90 km steps, road at 60 km. Emission factors per EcoTransit WTW (ISO 14083).
+            <strong>Method</strong> · {T.routing.method}
           </div>
         </div>
       </aside>
 
-      {/* Main canvas */}
       <main className="main">
         <div className="map-shell">
           <div className="map-shell__head">
             <div>
-              <div className="map-shell__eyebrow">Geospatial preview</div>
+              <div className="map-shell__eyebrow">{T.routing.geoPreview}</div>
               <div className="map-shell__title">
-                {result ? result.routeType : "Select a route to begin"}
+                {result
+                  ? ((T.routeLabels && T.routeLabels[result.routeType]) || result.routeType)
+                  : T.routing.selectRoute}
               </div>
             </div>
             {result && (
               <div className="map-shell__pills">
                 <div className="pill"><span>{result.distance.toLocaleString()}</span><em>km</em></div>
                 <div className="pill pill--accent" style={{ "--c": window.RISK_COLOR[result.riskLevel] }}>
-                  <span>{result.riskLevel}</span><em>risk</em>
+                  <span>{result.riskLevel}</span><em>{T.routing.risk}</em>
                 </div>
                 <div className="pill"><span>{(result.emissions.co2Total / 1000).toFixed(2)}</span><em>t CO₂e</em></div>
               </div>
@@ -181,16 +170,16 @@ function RoutingView({ tweaks }) {
             ? <window.MapView result={result} showRiskZones={tweaks.showRiskZones !== false} />
             : <div className="map-loading">
                 <div className="map-loading__spinner"></div>
-                <div>Loading cartography…</div>
+                <div>{T.routing.loadingMap}</div>
               </div>
           }
         </div>
 
         {result
-          ? <window.ResultsPanel result={result} />
+          ? <window.ResultsPanel result={result} lang={lang} />
           : <div className="empty">
-              <div className="empty__title">Configure a route to see analytics</div>
-              <div className="empty__sub">Pick a trade lane on the left, then click <strong>Compute route</strong>.</div>
+              <div className="empty__title">{T.routing.configureRoute}</div>
+              <div className="empty__sub">{T.routing.pickLane} <strong>{T.routing.compute}</strong>.</div>
             </div>
         }
       </main>
@@ -199,12 +188,21 @@ function RoutingView({ tweaks }) {
 }
 
 function App() {
-  // tweaks live at the app level so they persist across views
   const tweaksHook = useTweaks ? useTweaks(TWEAK_DEFAULTS) : null;
   const t = tweaksHook?.tweaks || TWEAK_DEFAULTS;
   const setTweak = tweaksHook?.setTweak || (() => {});
 
   const [view, setView] = _useState("routing");
+  const [lang, setLang] = _useState("en");
+
+  const T = window.TRANSLATIONS[lang];
+
+  const NAV = [
+    { id: "routing",     label: T.nav.routing },
+    { id: "analytics",   label: T.nav.analytics },
+    { id: "reports",     label: T.nav.insights },
+    { id: "methodology", label: T.nav.methodology },
+  ];
 
   const Methodology = window.MethodologyView;
   const Analytics   = window.AnalyticsView;
@@ -215,25 +213,16 @@ function App() {
       {TweaksPanel && TweakToggle && (
         <TweaksPanel>
           <TweakSection label="Carbon scenario">
-            <TweakSlider
-              label="EU ETS price"
-              value={t.etsPriceEur}
+            <TweakSlider label="EU ETS price" value={t.etsPriceEur}
               min={50} max={250} step={5} unit=" €/t"
-              onChange={v => setTweak("etsPriceEur", v)}
-            />
-            <TweakSlider
-              label="Annual containers"
-              value={t.annualContainers}
+              onChange={v => setTweak("etsPriceEur", v)} />
+            <TweakSlider label="Annual containers" value={t.annualContainers}
               min={100} max={5000} step={100} unit=""
-              onChange={v => setTweak("annualContainers", v)}
-            />
+              onChange={v => setTweak("annualContainers", v)} />
           </TweakSection>
           <TweakSection label="Routing map">
-            <TweakToggle
-              label="Show maritime risk zones"
-              value={t.showRiskZones}
-              onChange={v => setTweak("showRiskZones", v)}
-            />
+            <TweakToggle label="Show maritime risk zones" value={t.showRiskZones}
+              onChange={v => setTweak("showRiskZones", v)} />
           </TweakSection>
         </TweaksPanel>
       )}
@@ -241,27 +230,29 @@ function App() {
       <header className="topbar">
         <div className="topbar__left">
           <div className="brand">
-            <div className="brand__mark">
-              🌱
-            </div>
+            <div className="brand__mark">🌱</div>
             <div>
               <div className="brand__name">Eldor Trade Lanes</div>
-              <div className="brand__sub">Logistics Carbon Routing · Diploma Projesi</div>
+              <div className="brand__sub">{T.brand.sub}</div>
             </div>
           </div>
         </div>
         <nav className="topbar__nav">
           {NAV.map(n => (
-            <button
-              key={n.id}
-              onClick={() => setView(n.id)}
-              className={`nav-item ${view === n.id ? "is-active" : ""}`}
-            >
+            <button key={n.id} onClick={() => setView(n.id)}
+              className={`nav-item ${view === n.id ? "is-active" : ""}`}>
               {n.label}
             </button>
           ))}
         </nav>
         <div className="topbar__right">
+          <button
+            onClick={() => setLang(l => l === "en" ? "tr" : "en")}
+            className="lang-btn"
+            title={lang === "en" ? "Türkçeye geç" : "Switch to English"}
+          >
+            {T.langBtn}
+          </button>
           <div className="meta-chip">
             <span className="meta-chip__dot"></span>
             <span>v9.0 · Live</span>
@@ -272,32 +263,32 @@ function App() {
         </div>
       </header>
 
-      {view === "routing" && <RoutingView tweaks={t} />}
+      {view === "routing" && <RoutingView tweaks={t} lang={lang} />}
       {view === "analytics" && Analytics && (
-        <main className="page"><Analytics /></main>
+        <main className="page"><Analytics lang={lang} /></main>
       )}
       {view === "reports" && Reports && (
-        <main className="page"><Reports tweaks={t} /></main>
+        <main className="page"><Reports tweaks={t} lang={lang} /></main>
       )}
       {view === "methodology" && Methodology && (
-        <main className="page"><Methodology /></main>
+        <main className="page"><Methodology lang={lang} /></main>
       )}
 
       <footer className="footnote">
         <div className="footnote__col">
-          <div className="footnote__label">Dataset</div>
-          <div>14 lanes · 4 categories · maritime + road + rail</div>
+          <div className="footnote__label">{T.footer.dataset}</div>
+          <div>{T.footer.datasetVal}</div>
         </div>
         <div className="footnote__col">
-          <div className="footnote__label">Emission model</div>
-          <div>EcoTransit WTW · ISO 14083 compliant</div>
+          <div className="footnote__label">{T.footer.emission}</div>
+          <div>{T.footer.emissionVal}</div>
         </div>
         <div className="footnote__col">
-          <div className="footnote__label">Cartography</div>
-          <div>OpenStreetMap · CARTO basemap</div>
+          <div className="footnote__label">{T.footer.carto}</div>
+          <div>{T.footer.cartoVal}</div>
         </div>
         <div className="footnote__col footnote__col--right">
-          <div>© 2026 Eldor Trade Lanes — Academic build</div>
+          <div>{T.footer.copy}</div>
         </div>
       </footer>
     </div>

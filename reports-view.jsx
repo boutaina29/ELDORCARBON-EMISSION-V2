@@ -4,8 +4,9 @@
 //  in the European automotive industry
 // ════════════════════════════════════════════════════════════
 
-function InsightsView({ tweaks = {} }) {
+function InsightsView({ tweaks = {}, lang = "en" }) {
   const { PROJECT_ROUTES, ECOTRANSIT } = window.RoutingEngine;
+  const TI = window.TRANSLATIONS[lang].insights;
   const SEG = window.SEG_STYLE;
   const etsPrice = tweaks.etsPriceEur || 95;
   const annualContainers = tweaks.annualContainers || 600;
@@ -43,10 +44,10 @@ function InsightsView({ tweaks = {} }) {
       {/* ─── Hero ───────────────────────────────────────── */}
       <div className="ins-hero">
         <div className="ins-hero__col">
-          <div className="ins-hero__eyebrow">Module 03 · Industry insights</div>
+          <div className="ins-hero__eyebrow">{TI.eyebrow}</div>
           <h2 className="ins-hero__title">
-            The decarbonisation decade<br />
-            <em>for automotive logistics</em>
+            {TI.title}<br />
+            <em>{TI.titleEm}</em>
           </h2>
           <p className="ins-hero__sub">
             Between <strong>2024 and 2035</strong> the European automotive supply chain will pass through
@@ -58,15 +59,15 @@ function InsightsView({ tweaks = {} }) {
         <div className="ins-hero__stats">
           <div className="ins-hero__stat">
             <div className="ins-hero__stat-num">{Math.round(annualFleetCO2).toLocaleString()}<em> t CO₂e</em></div>
-            <div className="ins-hero__stat-lbl">Annual emissions at {annualContainers.toLocaleString()} TEU/yr · fleet-avg lane</div>
+            <div className="ins-hero__stat-lbl">{TI.annualStat(annualContainers)}</div>
           </div>
           <div className="ins-hero__stat">
             <div className="ins-hero__stat-num">€{Math.round(annualETSExposure).toLocaleString()}</div>
-            <div className="ins-hero__stat-lbl">ETS-equivalent exposure at €{etsPrice}/t (illustrative)</div>
+            <div className="ins-hero__stat-lbl">{TI.etsStat(etsPrice)}</div>
           </div>
           <div className="ins-hero__stat">
             <div className="ins-hero__stat-num">−{Math.round(((annualFleetCO2 - annualRailScenario) / annualFleetCO2) * 100)}%</div>
-            <div className="ins-hero__stat-lbl">Achievable cut by shifting long-haul road to RoRo + rail</div>
+            <div className="ins-hero__stat-lbl">{TI.railStat}</div>
           </div>
         </div>
       </div>
@@ -75,9 +76,9 @@ function InsightsView({ tweaks = {} }) {
       <div className="card card--ins">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">01 · Baseline</div>
-            <h3 className="card__title">Carbon intensity by transport mode</h3>
-            <div className="card__sub">EcoTransit / GLEC well-to-wheel emission factors · g CO₂e per tonne-kilometre</div>
+            <div className="card__eyebrow">{TI.s1eyebrow}</div>
+            <h3 className="card__title">{TI.s1title}</h3>
+            <div className="card__sub">{TI.s1sub}</div>
           </div>
         </div>
         <div className="mode-bars">
@@ -116,8 +117,8 @@ function InsightsView({ tweaks = {} }) {
       <div className="card card--ins">
         <div className="card__head">
           <div>
-            <div className="card__eyebrow">02 · Timeline</div>
-            <h3 className="card__title">Regulatory horizon · 2024 → 2050</h3>
+            <div className="card__eyebrow">{TI.s2eyebrow}</div>
+            <h3 className="card__title">{TI.s2title}</h3>
             <div className="card__sub">Six overlapping regimes that price, cap or ban carbon in the European auto value chain</div>
           </div>
         </div>
